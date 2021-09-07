@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
+import Vuex from './kvuex'
 
 Vue.use(Vuex)
 
@@ -13,10 +13,10 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    add(ctx){
+    add({commit}){
       setTimeout(()=>{
 
-        ctx.commit('add')
+        commit('add')
       },2000)
     }
   },

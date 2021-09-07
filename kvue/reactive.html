@@ -1,0 +1,51 @@
+<div id="app"></div>
+<script>
+  function defineReactive(obj, key, val) {
+    //如果val本身还是对象则需要递归处理
+    observe(val);
+    Object.defineProperty(obj, key, {
+      get() {
+        console.log("get", val);
+        return val;
+      },
+      set(v) {
+        if (v !== val) {
+          val = v;
+          //   如果传入v是对象仍然要做响应式处理
+          observe(v);
+          console.log("set", key);
+          //   update();
+        }
+      },
+    });
+  }
+  const obj = {
+    foo: "foo",
+    bar: "bar",
+  };
+ 
+  function observe(obj) {
+    if (typeof obj !== "object" || obj == null) {
+      return obj;
+    }
+    Object.keys(obj).forEach((key) => defineReactive(obj, key, obj[key]));
+  }
+
+  observe(obj);
+
+
+
+
+
+
+  //   全量更新
+  //   function update() {
+  //     app.innerHTML = obj.foo;
+  //     // const vdom=render()
+  //     // patch(oldVdom,vdom)
+  //   }
+  //   //数据启动
+  //   setInterval(() => {
+  //     obj.foo = new Date().toString();
+  //   });
+</script>

@@ -1,13 +1,15 @@
 // 1.实现响应式
 // vue2:Object.defineProperty(obj,key,desc)
 // vue3:new Proxy()
+
+
 // 设置obj的key,拦截它,初始值val
 function defineReactive(obj, key, val) {
   // 如果val本身还是对象,则需要递归处理
   observe(val);
   Object.defineProperty(obj, key, {
     get() {
-      console.log("get", val);
+      // console.log("get", val);
       return val;
     },
     set(v) {
@@ -15,7 +17,7 @@ function defineReactive(obj, key, val) {
         val = v;
         // 如果传入v式哥对象，则仍然做响应式处理
         observe(v);
-        console.log("set", key);
+        // console.log("set", key);
       }
     },
   });
@@ -37,22 +39,61 @@ function proxy(vm) {
       get() {
         return vm.$data[key];
       },
-      set(v){
-          vm.$data[key]=v
-      }
+      set(v) {
+        vm.$data[key] = v;
+      },
     });
   });
 }
+
 class KVue {
   constructor(options) {
-    // 1保存选项
-    console.log(options);
     this.$options = options;
     this.$data = options.data;
-    // 2对data选项做响应式处理
+
+    // 对data选项做响应式处理
     observe(this.$data);
-    // 2.5d大力
-    proxy(this)
-    // 3编译
+
+    // 代理data到vm上
+    proxy(this);
+
+    // 执行编译
+    new Compile(options.el, this);
+  }
+}
+
+
+class Compile {
+  constructor(el, vm) {
+    // 保存kvue实例
+    this.$vm = vm;
+    // 编译模板树
+    this.compile(document.querySelector(el));
+  }
+  compile(el) {
+    // 遍历el
+    // 获取所有子阶段
+    el.childNodes.forEach((node) => {
+      // 判断node类型
+      console.log(node);
+      if (node.nodeType === 1) {
+        // 元素
+        console.log("element", node.nodeName);
+        if (node.childNodes.length > 0) {
+          this.compile(node);
+        }
+      } else if (this.isInter(node)) {
+        // 插值文本
+        console.log("text", node.textContent);
+        this.compileText(node)
+      }
+    });
+  }
+  //处理插值文本
+  compileText(node){
+    node.textContent=this.$vm[RegExp.$1 ]
+  }
+  isInter(node) {
+    return node.nodeType == 3 && /\{\{(.*)\}\}/.test(node.textContent);
   }
 }
